@@ -91,4 +91,4 @@ This project is currently **private**. For partnership, usage rights, or collabo
 
 **Trần Tuấn Hiệp** – Founder of Vietnamese Waves™  
 > Software Engineer | Financial Strategist | Spiritual Thinker  
-> GitHub: [@your_github] (replace with your handle)
+> GitHub: [https://github.com/tuanhiep]
