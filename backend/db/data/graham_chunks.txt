@@ -1,5 +1,35 @@
 Title: Margin of Safety
-Summary: Margin of Safety is the central concept of Graham's philosophy, protecting the investor against errors in judgment and market volatility.
-Quote: "The function of the margin of safety is, in essence, that of rendering unnecessary an accurate estimate of the future."
-Keywords: risk, valuation buffer, defensive
-Khí: Tĩnh – Phòng Thủ – Không Vi
+Summary: Margin of Safety is the central concept of Graham's philosophy. It protects the investor against errors in judgment, weak assumptions, and market volatility by requiring a meaningful discount to conservative intrinsic value.
+Quote: The function of the margin of safety is to make an accurate estimate of the future less necessary.
+Keywords: risk, valuation buffer, defensive, intrinsic value
+Khi: Tinh - Phong Thu - Khong Vi
+
+Title: Intrinsic Value
+Summary: Intrinsic value is not a precise number. It is a reasoned range built from earnings power, assets, balance-sheet quality, cyclicality, and conservative assumptions.
+Quote: An investment operation is one which, upon thorough analysis, promises safety of principal and an adequate return.
+Keywords: valuation, earnings power, assets, conservative assumptions
+Khi: Tinh - Phan Tich - Ky Luat
+
+Title: Defensive Investor
+Summary: A defensive investor should prefer simplicity, diversification, strong finances, long records of profitability, and valuation discipline. The goal is durable adequacy, not excitement.
+Quote: The investor's chief problem, and even his worst enemy, is likely to be himself.
+Keywords: defensive investor, diversification, profitability, temperament
+Khi: On Dinh - Khiem Ton - Ben Bi
+
+Title: Enterprising Investor
+Summary: An enterprising investor may search for special situations or undervalued securities, but only with deeper work, better evidence, and stricter risk control.
+Quote: To achieve satisfactory investment results is easier than most people realize; to achieve superior results is harder than it looks.
+Keywords: enterprising investor, special situations, research, risk control
+Khi: Chu Dong - Nghien Cuu - Kiem Soat
+
+Title: Mr Market
+Summary: Market prices are offers, not instructions. The disciplined investor uses volatility as a servant and refuses to let changing quotations define business value.
+Quote: The market is there to serve you, not to instruct you.
+Keywords: market volatility, behavior, discipline, long term
+Khi: Binh Than - Doc Lap - Khong FOMO
+
+Title: Earnings Stability
+Summary: Graham-style analysis values durable earnings more than dramatic narratives. A long record of positive earnings and manageable debt deserves more trust than optimistic projections.
+Quote: Operations for profit should be based not on optimism but on arithmetic.
+Keywords: earnings, stability, debt, profitability, arithmetic
+Khi: Thuc Chung - Can Trong - Ro Rang

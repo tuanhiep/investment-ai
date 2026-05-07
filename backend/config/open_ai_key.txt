@@ -1,1 +1,1 @@
-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
+Put your OpenAI API key in the OPENAI_API_KEY environment variable or backend/.env.

@@ -1,46 +1,65 @@
-# 📈 InvestmentAI – AI-Powered Investment Decision Platform
+# InvestmentAI
 
-**InvestmentAI** is an end-to-end web application that helps you make smarter investment decisions using AI and timeless financial wisdom. Built with a modern stack: **React + Tailwind CSS + Vite** for the frontend and **FastAPI** for the backend.
+InvestmentAI is a full-stack investment research workspace inspired by Benjamin Graham. It combines a FastAPI backend, an AI/RAG advisory layer, Yahoo Finance snapshots, and a React/Vite frontend built for asking disciplined investment questions.
 
----
+This project is not financial advice. It is a research assistant that helps separate facts, assumptions, risks, and next steps.
 
-## 📦 Project Structure
+## What It Does
 
-```
+- Answers investment questions with a Graham-style framework: margin of safety, intrinsic value, earnings stability, temperament, and evidence quality.
+- Retrieves local knowledge from `backend/db/data/graham_chunks.txt` before asking the LLM.
+- Works without an OpenAI key by returning a deterministic local fallback answer.
+- Uses OpenAI when `OPENAI_API_KEY` is configured.
+- Fetches ticker snapshots through Yahoo Finance.
+- Provides REST endpoints and a WebSocket chat endpoint.
+- Ships a responsive React investment workspace with chat, sources, decision principles, and market metrics.
+
+## Project Structure
+
+```text
 InvestmentAI/
-├── backend/          # FastAPI backend with Python
-│   ├── main.py       # Entry point
-│   └── app/          # API, services, models
-├── frontend/         # React + Tailwind + Vite frontend
-│   ├── index.html
-│   └── src/
-└── README.md         # Project overview
+├── backend/
+│   ├── api/routes.py              # REST and WebSocket routes
+│   ├── agents/prompt_graham.py    # Advisor prompt contract
+│   ├── config/config.py           # Environment-driven settings
+│   ├── db/data/graham_chunks.txt  # Local investment knowledge base
+│   ├── services/                  # Advisor, retrieval, market data
+│   ├── schemas.py                 # API models
+│   └── main.py                    # FastAPI application
+├── frontend/
+│   ├── src/App.tsx                # Investment workspace
+│   ├── src/App.css
+│   └── vite.config.ts             # API and WebSocket proxy
+└── launch.py                      # Backend launcher
 ```
 
----
+## Backend Setup
 
-## 🚀 Features
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
 
-### 🧠 AI-Powered Investing
-- Intelligent prompts based on Graham, Fisher, Lynch & other investment philosophies
-- Investment Council simulation using AI agents
-- Custom evaluation framework for buy/sell decisions
+Set `OPENAI_API_KEY` in `backend/.env` or your shell if you want LLM answers. Without it, the backend still runs in local fallback mode.
 
-### 📊 Frontend (React + Vite + Tailwind)
-- Lightning-fast performance with [Vite](https://vitejs.dev/)
-- Beautiful UI powered by [Tailwind CSS](https://tailwindcss.com/)
-- Responsive, minimal, and extendable
+```bash
+cd ..
+uvicorn backend.main:app --reload
+```
 
-### ⚙️ Backend (Python + FastAPI)
-- Fast, modern API with [FastAPI](https://fastapi.tiangolo.com/)
-- Handles all AI logic, evaluation pipeline, and data processing
-- Easy to deploy and scale
+Backend runs on `http://127.0.0.1:8000`.
 
----
+Useful endpoints:
 
-## 🛠️ Getting Started
+- `GET /api/health`
+- `POST /api/chat`
+- `GET /api/stock/{symbol}`
+- `WS /ws/chat`
 
-### 🖥️ Frontend Setup
+## Frontend Setup
 
 ```bash
 cd frontend
@@ -48,47 +67,18 @@ npm install
 npm run dev
 ```
 
-Runs on: `http://localhost:5173/`
+Frontend runs on `http://localhost:5173` and proxies `/api` and `/ws` to the backend.
 
-### 🧠 Backend Setup
+## Development Checks
 
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+cd frontend
+npm run build
+
+cd ../backend
+python -m compileall .
 ```
 
-Runs on: `http://localhost:8000/`
+## Security Notes
 
----
-
-## 📌 Tech Stack
-
-| Layer     | Technology                       |
-|-----------|----------------------------------|
-| Frontend  | React, Vite, Tailwind CSS        |
-| Backend   | Python, FastAPI                  |
-| Dev Tools | VSCode, PyCharm, GitHub          |
-
----
-
-## 🔮 Vision
-
-> “Not all growth stocks are good investments. Only those with real vitality – and aligned with your nature – can accompany you long term.”  
-> — *InvestmentAI Philosophy*
-
-This app blends timeless investing principles with modern AI to empower **long-term, aligned, and wise investment decisions**.
-
----
-
-## 📄 License
-
-This project is currently **private**. For partnership, usage rights, or collaboration opportunities, please contact the author directly.
-
----
-
-## ✨ Author
-
-**Trần Tuấn Hiệp** – Founder of Vietnamese Waves™  
-> Software Engineer | Financial Strategist | Spiritual Thinker  
-> GitHub: [https://github.com/tuanhiep]
+Never commit API keys. Use environment variables or `backend/.env`, which is ignored by git.

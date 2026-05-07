@@ -1,24 +1,30 @@
-import streamlit as st
-from langchain.llms import OpenAI
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from backend.services.query_service import answer_question
-import os
+from backend.api.routes import router
+from backend.config.config import get_settings
 
 
-# Initialize the language model
-llm = OpenAI(temperature=0)
+settings = get_settings()
 
-st.title("Ask Benjamin Graham – Khí Học")
+app = FastAPI(
+    title=settings.app_name,
+    description="AI investment research workspace inspired by Benjamin Graham.",
+    version="1.0.0",
+)
 
-st.markdown("""
-Before asking, take a breath.
-Graham only responds to questions asked with discipline and clarity.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-> *“Investment is most intelligent when it is most businesslike.”*
-""")
+app.include_router(router, prefix=settings.api_prefix)
+app.include_router(router)
 
-query = st.text_input("Your investment question:")
 
-if query:
-    result = answer_question(query)
-    st.write(result)
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {"app": settings.app_name, "status": "ready", "docs": "/docs"}
