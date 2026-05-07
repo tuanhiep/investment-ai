@@ -18,6 +18,11 @@ class Settings:
     ]
     openai_api_key = os.getenv("OPENAI_API_KEY", "")
     openai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    sec_edgar_user_agent = os.getenv(
+        "SEC_EDGAR_USER_AGENT",
+        "InvestmentAI/1.0 contact@example.com",
+    )
+    market_data_timeout_seconds = float(os.getenv("MARKET_DATA_TIMEOUT_SECONDS", "8"))
     knowledge_file = Path(
         os.getenv("INVESTMENTAI_KNOWLEDGE_FILE", BASE_DIR / "db" / "data" / "graham_chunks.txt")
     )

@@ -10,7 +10,7 @@ This project is not financial advice. It is a research assistant that helps sepa
 - Retrieves local knowledge from `backend/db/data/graham_chunks.txt` before asking the LLM.
 - Works without an OpenAI key by returning a deterministic local fallback answer.
 - Uses OpenAI when `OPENAI_API_KEY` is configured.
-- Fetches ticker snapshots through Yahoo Finance.
+- Fetches free market snapshots by combining Stooq price data with SEC EDGAR company fundamentals.
 - Provides REST endpoints and a WebSocket chat endpoint.
 - Ships a responsive React investment workspace with chat, sources, decision principles, and market metrics.
 
@@ -23,7 +23,7 @@ InvestmentAI/
 │   ├── agents/investment_advisor_prompt.py
 │   ├── config/config.py           # Environment-driven settings
 │   ├── db/data/graham_chunks.txt  # Local investment knowledge base
-│   ├── services/                  # Advisor, retrieval, market data
+│   ├── services/                  # Advisor, retrieval, Stooq + SEC market data
 │   ├── schemas.py                 # API models
 │   └── main.py                    # FastAPI application
 ├── frontend/
@@ -58,6 +58,11 @@ Useful endpoints:
 - `POST /api/chat`
 - `GET /api/stock/{symbol}`
 - `WS /ws/chat`
+
+Market data is intentionally built on free sources:
+
+- Stooq for latest available OHLCV price data.
+- SEC EDGAR Company Facts for U.S. company fundamentals such as EPS, revenue, net income, assets, liabilities, equity, and shares outstanding.
 
 ## Frontend Setup
 

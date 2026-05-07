@@ -17,6 +17,7 @@ type ChatResponse = {
 
 type StockSnapshot = {
   symbol: string;
+  company_name?: string | null;
   price?: number | null;
   pe?: number | null;
   roe?: number | null;
@@ -28,6 +29,13 @@ type StockSnapshot = {
   volume?: number | null;
   as_of?: string | null;
   currency?: string | null;
+  revenue?: number | null;
+  net_income?: number | null;
+  assets?: number | null;
+  liabilities?: number | null;
+  equity?: number | null;
+  shares_outstanding?: number | null;
+  fiscal_period?: string | null;
   source?: string;
   status?: "available" | "partial" | "unavailable";
   warning?: string | null;
@@ -222,8 +230,10 @@ function App() {
               </div>
               {stock ? (
                 <p className="data-source">
+                  {stock.company_name ? `${stock.company_name} · ` : ""}
                   {stock.source || "Market data"}
-                  {stock.as_of ? ` · ${stock.as_of}` : ""}
+                  {stock.as_of ? ` · Price ${stock.as_of}` : ""}
+                  {stock.fiscal_period ? ` · SEC ${stock.fiscal_period}` : ""}
                 </p>
               ) : null}
               {stockError ? <p className="error-text">{stockError}</p> : null}
@@ -265,6 +275,22 @@ function App() {
                 <div>
                   <dt>Volume</dt>
                   <dd>{formatNumber(stock?.volume)}</dd>
+                </div>
+                <div>
+                  <dt>Revenue</dt>
+                  <dd>{formatMarketCap(stock?.revenue)}</dd>
+                </div>
+                <div>
+                  <dt>Net Income</dt>
+                  <dd>{formatMarketCap(stock?.net_income)}</dd>
+                </div>
+                <div>
+                  <dt>Assets</dt>
+                  <dd>{formatMarketCap(stock?.assets)}</dd>
+                </div>
+                <div>
+                  <dt>Equity</dt>
+                  <dd>{formatMarketCap(stock?.equity)}</dd>
                 </div>
               </dl>
             </section>
