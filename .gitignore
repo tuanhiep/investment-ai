@@ -1,11 +1,13 @@
 .DS_Store
+.vscode/
 __pycache__/
 *.py[cod]
 .venv/
 backend/.venv/
 .env
 backend/config/.env
-backend/config/open_ai_key.txt
+backend/db/graham_db/
+backend/tests/chroma_db/
 node_modules/
 dist/
 frontend/dist/

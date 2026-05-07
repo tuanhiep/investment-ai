@@ -294,15 +294,30 @@
 }
 
 .principle span,
-.error-text {
+.data-source,
+.error-text,
+.warning-text {
   color: #625847;
   font-size: 0.9rem;
   line-height: 1.45;
 }
 
+.data-source {
+  margin-top: 10px;
+}
+
 .error-text {
   color: #a33b2f;
   margin-top: 10px;
+}
+
+.warning-text {
+  background: #f7efd9;
+  border: 1px solid #e0d2b8;
+  border-radius: 8px;
+  color: #7a4d21;
+  margin-top: 12px;
+  padding: 10px;
 }
 
 @media (max-width: 1040px) {

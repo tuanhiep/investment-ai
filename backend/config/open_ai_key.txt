@@ -1,1 +1,0 @@
-Put your OpenAI API key in the OPENAI_API_KEY environment variable or backend/.env.

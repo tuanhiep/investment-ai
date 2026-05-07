@@ -20,7 +20,7 @@ This project is not financial advice. It is a research assistant that helps sepa
 InvestmentAI/
 ├── backend/
 │   ├── api/routes.py              # REST and WebSocket routes
-│   ├── agents/prompt_graham.py    # Advisor prompt contract
+│   ├── agents/investment_advisor_prompt.py
 │   ├── config/config.py           # Environment-driven settings
 │   ├── db/data/graham_chunks.txt  # Local investment knowledge base
 │   ├── services/                  # Advisor, retrieval, market data

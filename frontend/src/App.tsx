@@ -22,7 +22,15 @@ type StockSnapshot = {
   roe?: number | null;
   eps?: number | null;
   market_cap?: number | null;
+  open?: number | null;
+  high?: number | null;
+  low?: number | null;
+  volume?: number | null;
+  as_of?: string | null;
   currency?: string | null;
+  source?: string;
+  status?: "available" | "partial" | "unavailable";
+  warning?: string | null;
 };
 
 type Message = {
@@ -119,7 +127,7 @@ function App() {
 
     try {
       const response = await fetch(`/api/stock/${encodeURIComponent(ticker)}`);
-      if (!response.ok) throw new Error("Không lấy được dữ liệu thị trường");
+      if (!response.ok) throw new Error("Yêu cầu dữ liệu thị trường không hợp lệ");
       setStock((await response.json()) as StockSnapshot);
     } catch (error) {
       setStock(null);
@@ -212,7 +220,14 @@ function App() {
                   Fetch
                 </button>
               </div>
+              {stock ? (
+                <p className="data-source">
+                  {stock.source || "Market data"}
+                  {stock.as_of ? ` · ${stock.as_of}` : ""}
+                </p>
+              ) : null}
               {stockError ? <p className="error-text">{stockError}</p> : null}
+              {stock?.warning ? <p className="warning-text">{stock.warning}</p> : null}
               <dl className="metrics">
                 <div>
                   <dt>Price</dt>
@@ -236,6 +251,20 @@ function App() {
                 <div>
                   <dt>Market Cap</dt>
                   <dd>{formatMarketCap(stock?.market_cap)}</dd>
+                </div>
+                <div>
+                  <dt>Open</dt>
+                  <dd>{formatNumber(stock?.open)}</dd>
+                </div>
+                <div>
+                  <dt>High / Low</dt>
+                  <dd>
+                    {formatNumber(stock?.high)} / {formatNumber(stock?.low)}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Volume</dt>
+                  <dd>{formatNumber(stock?.volume)}</dd>
                 </div>
               </dl>
             </section>

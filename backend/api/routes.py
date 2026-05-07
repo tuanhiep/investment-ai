@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 
 from backend.config.config import get_settings
 from backend.schemas import ChatRequest, ChatResponse, HealthResponse, StockSnapshot
-from backend.services.functions.stock_data import get_stock_data
-from backend.services.query_service import advisor
+from backend.services.investment_advisor_service import advisor
+from backend.services.market_data_service import get_stock_snapshot
 
 
 router = APIRouter()
@@ -23,9 +23,9 @@ async def chat(request: ChatRequest) -> ChatResponse:
 @router.get("/stock/{symbol}", response_model=StockSnapshot)
 async def stock_snapshot(symbol: str) -> StockSnapshot:
     try:
-        return StockSnapshot(**get_stock_data(symbol))
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Could not fetch stock data for {symbol.upper()}") from exc
+        return StockSnapshot(**get_stock_snapshot(symbol))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.websocket("/ws/chat")
