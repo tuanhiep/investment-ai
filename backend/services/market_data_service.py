@@ -4,6 +4,7 @@ import csv
 from dataclasses import dataclass
 from functools import lru_cache
 from io import StringIO
+from time import monotonic
 from typing import Any
 
 import requests
@@ -64,6 +65,36 @@ class CompanyFundamentals:
     shares_outstanding: float | None
     fiscal_period: str | None
     source: str = "SEC EDGAR"
+
+
+@dataclass
+class CacheEntry:
+    value: dict[str, Any]
+    expires_at: float
+
+
+class TtlCache:
+    def __init__(self, ttl_seconds: float, clock: Any = monotonic) -> None:
+        self.ttl_seconds = ttl_seconds
+        self.clock = clock
+        self._values: dict[str, CacheEntry] = {}
+
+    def get(self, key: str) -> dict[str, Any] | None:
+        entry = self._values.get(key)
+        if not entry:
+            return None
+        if entry.expires_at <= self.clock():
+            self._values.pop(key, None)
+            return None
+        return dict(entry.value)
+
+    def set(self, key: str, value: dict[str, Any]) -> None:
+        if self.ttl_seconds <= 0:
+            return
+        self._values[key] = CacheEntry(value=dict(value), expires_at=self.clock() + self.ttl_seconds)
+
+    def clear(self) -> None:
+        self._values.clear()
 
 
 class StooqPriceProvider:
@@ -215,18 +246,29 @@ class SecEdgarFundamentalProvider:
 
 
 class MarketDataService:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        price_provider: StooqPriceProvider | None = None,
+        fundamental_provider: SecEdgarFundamentalProvider | None = None,
+        cache: TtlCache | None = None,
+    ) -> None:
         settings = get_settings()
-        self.price_provider = StooqPriceProvider(settings.market_data_timeout_seconds)
-        self.fundamental_provider = SecEdgarFundamentalProvider(
+        self.price_provider = price_provider or StooqPriceProvider(settings.market_data_timeout_seconds)
+        self.fundamental_provider = fundamental_provider or SecEdgarFundamentalProvider(
             timeout_seconds=settings.market_data_timeout_seconds,
             user_agent=settings.sec_edgar_user_agent,
         )
+        self.cache = cache or TtlCache(settings.market_data_cache_ttl_seconds)
 
     def get_stock_snapshot(self, symbol: str) -> dict[str, Any]:
         normalized = symbol.strip().upper()
         if not normalized:
             raise ValueError("Stock symbol is required")
+
+        cached = self.cache.get(normalized)
+        if cached:
+            cached["cache_status"] = "hit"
+            return cached
 
         snapshot: dict[str, Any] = {
             "symbol": normalized,
@@ -252,6 +294,7 @@ class MarketDataService:
             "source": "Stooq + SEC EDGAR",
             "status": "unavailable",
             "warning": None,
+            "cache_status": "miss",
         }
         warnings: list[str] = []
 
@@ -311,6 +354,7 @@ class MarketDataService:
         elif snapshot["status"] == "partial":
             snapshot["warning"] = "Dữ liệu đang một phần; một số chỉ số có thể là N/A."
 
+        self.cache.set(normalized, snapshot)
         return snapshot
 
 

@@ -3,7 +3,9 @@
 __pycache__/
 *.py[cod]
 .venv/
+.venv*/
 backend/.venv/
+*.egg-info/
 .env
 backend/config/.env
 backend/db/graham_db/

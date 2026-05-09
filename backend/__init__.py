@@ -1,0 +1,1 @@
+"""InvestmentAI backend package."""

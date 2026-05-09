@@ -19,6 +19,7 @@ This project is not financial advice. It is a research assistant that helps sepa
 ```text
 InvestmentAI/
 ├── backend/
+│   ├── __init__.py               # Installable Python package
 │   ├── api/routes.py              # REST and WebSocket routes
 │   ├── agents/investment_advisor_prompt.py
 │   ├── config/config.py           # Environment-driven settings
@@ -26,6 +27,10 @@ InvestmentAI/
 │   ├── services/                  # Advisor, retrieval, Stooq + SEC market data
 │   ├── schemas.py                 # API models
 │   └── main.py                    # FastAPI application
+├── docs/
+│   ├── data-pipeline.md
+│   ├── deployment.md
+│   └── threat-model.md
 ├── frontend/
 │   ├── src/App.tsx                # Investment workspace
 │   ├── src/App.css
@@ -41,6 +46,12 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
+```
+
+For development and tests, install the package from the repo root:
+
+```bash
+pip install -e ".[dev]"
 ```
 
 Set `OPENAI_API_KEY` in `backend/.env` or your shell if you want LLM answers. Without it, the backend still runs in local fallback mode.
@@ -64,6 +75,8 @@ Market data is intentionally built on free sources:
 - Stooq for latest available OHLCV price data.
 - SEC EDGAR Company Facts for U.S. company fundamentals such as EPS, revenue, net income, assets, liabilities, equity, and shares outstanding.
 
+Market snapshots use a small in-process TTL cache controlled by `MARKET_DATA_CACHE_TTL_SECONDS`. See `docs/data-pipeline.md`.
+
 ## Frontend Setup
 
 ```bash
@@ -82,8 +95,13 @@ npm run build
 
 cd ../backend
 python -m compileall .
+
+cd ..
+python -m pytest
 ```
 
 ## Security Notes
 
 Never commit API keys. Use environment variables or `backend/.env`, which is ignored by git.
+
+See `docs/threat-model.md` and `docs/deployment.md` for the current production-hardening assumptions and release checklist.

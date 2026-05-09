@@ -23,6 +23,7 @@ class Settings:
         "InvestmentAI/1.0 contact@example.com",
     )
     market_data_timeout_seconds = float(os.getenv("MARKET_DATA_TIMEOUT_SECONDS", "8"))
+    market_data_cache_ttl_seconds = float(os.getenv("MARKET_DATA_CACHE_TTL_SECONDS", "300"))
     knowledge_file = Path(
         os.getenv("INVESTMENTAI_KNOWLEDGE_FILE", BASE_DIR / "db" / "data" / "graham_chunks.txt")
     )

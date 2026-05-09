@@ -44,6 +44,7 @@ class StockSnapshot(BaseModel):
     source: str = "Stooq + SEC EDGAR"
     status: str = "available"
     warning: str | None = None
+    cache_status: str = "miss"
 
 
 class HealthResponse(BaseModel):
