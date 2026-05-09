@@ -14,6 +14,16 @@ class KnowledgeRetrievalTest(unittest.TestCase):
         self.assertTrue(chunks)
         self.assertTrue(matches)
         self.assertEqual(matches[0][0].title, "Margin of Safety")
+        self.assertEqual(matches[0][0].source, "Benjamin Graham, The Intelligent Investor, Chapter 20")
+
+    def test_retrieve_uses_vector_signal_for_related_language(self) -> None:
+        knowledge_path = Path(__file__).resolve().parents[1] / "db" / "data" / "graham_chunks.txt"
+        chunks = load_knowledge(knowledge_path)
+
+        matches = retrieve("Should I obey the market quote or treat it as an offer?", chunks)
+
+        self.assertTrue(matches)
+        self.assertEqual(matches[0][0].title, "Mr Market")
 
 
 if __name__ == "__main__":

@@ -1,35 +1,95 @@
 Title: Margin of Safety
-Summary: Margin of Safety is the central concept of Graham's philosophy. It protects the investor against errors in judgment, weak assumptions, and market volatility by requiring a meaningful discount to conservative intrinsic value.
-Quote: The function of the margin of safety is to make an accurate estimate of the future less necessary.
-Keywords: risk, valuation buffer, defensive, intrinsic value
+Summary: Margin of safety is the central Graham principle. A security is attractive only when the market price stands far enough below a conservative estimate of value to absorb analytical error, business deterioration, and market volatility.
+Source: Benjamin Graham, The Intelligent Investor, Chapter 20
+Source Type: primary book
+Quote: Margin of safety is always dependent on the price paid.
+Keywords: risk, valuation buffer, defensive, intrinsic value, downside protection, purchase price
 Khi: Tinh - Phong Thu - Khong Vi
 
-Title: Intrinsic Value
-Summary: Intrinsic value is not a precise number. It is a reasoned range built from earnings power, assets, balance-sheet quality, cyclicality, and conservative assumptions.
+Title: Intrinsic Value Range
+Summary: Graham did not treat intrinsic value as a mystical point estimate. It is a reasoned range anchored in assets, normalized earnings power, dividends, financial strength, and conservative assumptions. The analyst should prefer approximate correctness over precise optimism.
+Source: Benjamin Graham and David Dodd, Security Analysis
+Source Type: primary book
 Quote: An investment operation is one which, upon thorough analysis, promises safety of principal and an adequate return.
-Keywords: valuation, earnings power, assets, conservative assumptions
+Keywords: valuation, earnings power, assets, conservative assumptions, appraisal, range
 Khi: Tinh - Phan Tich - Ky Luat
 
 Title: Defensive Investor
-Summary: A defensive investor should prefer simplicity, diversification, strong finances, long records of profitability, and valuation discipline. The goal is durable adequacy, not excitement.
-Quote: The investor's chief problem, and even his worst enemy, is likely to be himself.
-Keywords: defensive investor, diversification, profitability, temperament
+Summary: A defensive investor should prefer simplicity, diversification, strong finances, long records of profitability, and valuation discipline. The aim is satisfactory results with low friction, not cleverness or excitement.
+Source: Benjamin Graham, The Intelligent Investor, Chapters 4-5 and 14
+Source Type: primary book
+Quote: The investor's chief problem is likely to be himself.
+Keywords: defensive investor, diversification, profitability, temperament, low effort, selection criteria
 Khi: On Dinh - Khiem Ton - Ben Bi
 
 Title: Enterprising Investor
-Summary: An enterprising investor may search for special situations or undervalued securities, but only with deeper work, better evidence, and stricter risk control.
-Quote: To achieve satisfactory investment results is easier than most people realize; to achieve superior results is harder than it looks.
-Keywords: enterprising investor, special situations, research, risk control
+Summary: An enterprising investor may look for bargains, special situations, unpopular large companies, or asset-backed securities, but only with superior evidence, deeper work, and stricter risk control. Extra return must be earned by extra discipline.
+Source: Benjamin Graham, The Intelligent Investor, Chapters 6-7 and 15
+Source Type: primary book
+Quote: Superior results are harder than they look.
+Keywords: enterprising investor, special situations, net nets, bargains, unpopular, research, risk control
 Khi: Chu Dong - Nghien Cuu - Kiem Soat
 
 Title: Mr Market
-Summary: Market prices are offers, not instructions. The disciplined investor uses volatility as a servant and refuses to let changing quotations define business value.
-Quote: The market is there to serve you, not to instruct you.
-Keywords: market volatility, behavior, discipline, long term
+Summary: Market quotations are offers, not commands. The investor should use price volatility as a servant: buy only when the quote is favorable, ignore it when it is foolish, and never let changing prices replace business judgment.
+Source: Benjamin Graham, The Intelligent Investor, Chapter 8
+Source Type: primary book
+Quote: The market is there to serve you.
+Keywords: market volatility, behavior, discipline, voting machine, weighing machine, long term, temperament
 Khi: Binh Than - Doc Lap - Khong FOMO
 
 Title: Earnings Stability
-Summary: Graham-style analysis values durable earnings more than dramatic narratives. A long record of positive earnings and manageable debt deserves more trust than optimistic projections.
-Quote: Operations for profit should be based not on optimism but on arithmetic.
-Keywords: earnings, stability, debt, profitability, arithmetic
+Summary: Graham-style analysis values durable earnings more than dramatic narratives. A long record of positive earnings, normalized profit power, and manageable debt deserves more trust than optimistic projections about a distant future.
+Source: Benjamin Graham, The Intelligent Investor; Security Analysis
+Source Type: primary book
+Quote: Operations for profit should be based on arithmetic.
+Keywords: earnings, stability, debt, profitability, arithmetic, normalized earnings, cyclicality
 Khi: Thuc Chung - Can Trong - Ro Rang
+
+Title: Balance Sheet Strength
+Summary: Graham gives heavy weight to financial position. Current assets, working capital, debt maturity, interest burden, liquidity, and tangible equity can decide whether a decline is survivable or fatal.
+Source: Benjamin Graham and David Dodd, Security Analysis
+Source Type: primary book
+Quote: The balance sheet deserves independent attention.
+Keywords: balance sheet, liquidity, current ratio, debt, tangible assets, solvency, equity
+Khi: Can - Trong - Giu Tru
+
+Title: Net Current Asset Value
+Summary: Graham's net-net approach seeks companies selling below net current asset value after subtracting all liabilities. It is a strict bargain test, not a generic cheap-stock label, and usually requires diversification because individual business quality can be poor.
+Source: Benjamin Graham, Security Analysis; Graham-Newman investment practice
+Source Type: primary book and historical practice
+Quote: Bargains are made by price, not by popularity.
+Keywords: NCAV, net net, current assets, liabilities, liquidation value, bargain, diversification
+Khi: Gia - Tri - Tai - San
+
+Title: Growth Stock Discipline
+Summary: Graham did not deny growth, but warned that paying too much for expected growth destroys the margin of safety. Growth deserves value only when supported by durable economics, conservative assumptions, and a price that leaves room for disappointment.
+Source: Benjamin Graham, The Intelligent Investor, Chapters 11 and 12
+Source Type: primary book
+Quote: Obvious prospects for growth may not translate into obvious profits.
+Keywords: growth stock, valuation, expectations, optimism, earnings multiple, margin of safety
+Khi: Sang - Nhung - Khong - Say
+
+Title: Analyst Humility
+Summary: Graham's method forces humility: separate facts from forecasts, test assumptions against long records, and accept that many securities should be passed over. A good answer often says what cannot yet be known.
+Source: Benjamin Graham, The Intelligent Investor; The Interpretation of Financial Statements
+Source Type: primary book
+Quote: The future is uncertain.
+Keywords: uncertainty, evidence, assumptions, humility, financial statements, pass
+Khi: Rong - Tinh - Khong - Vong
+
+Title: Price Versus Quality
+Summary: A wonderful business can still be a poor investment at the wrong price, while an ordinary business may be attractive at a deep discount. Graham's first loyalty is not to narrative quality, but to price paid versus evidence-backed value.
+Source: Benjamin Graham, The Intelligent Investor
+Source Type: primary book
+Quote: Price is part of the proposition.
+Keywords: quality, price, valuation, bargain, overpaying, evidence-backed value
+Khi: Tri - Gia - Khong - Me - Danh
+
+Title: Evidence Hierarchy
+Summary: For a real stock question, Graham-style analysis should rank evidence by reliability: audited filings and financial statements first, market quotes as current offers, reputable market data as measurement, and commentary only as secondary interpretation.
+Source: SEC EDGAR filings, exchange/market data, Graham analytical method
+Source Type: primary filings and market data
+Quote: Facts first, judgment second.
+Keywords: SEC, EDGAR, filings, market data, financial statements, audit, source quality, evidence
+Khi: Thuc - Chung - Truoc - Luon

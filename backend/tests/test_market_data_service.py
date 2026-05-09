@@ -50,6 +50,16 @@ class FakeFundamentalProvider:
             equity=120_000_000.0,
             shares_outstanding=10_000_000.0,
             fiscal_period="2026 FY",
+            annual_history=[
+                {"year": 2026, "revenue": 100_000_000.0, "net_income": 25_000_000.0, "eps": 5.0},
+                {"year": 2025, "revenue": 90_000_000.0, "net_income": 20_000_000.0, "eps": 4.0},
+            ],
+            earnings_years=2,
+            positive_earnings_years=2,
+            latest_annual_revenue=100_000_000.0,
+            oldest_annual_revenue=90_000_000.0,
+            latest_annual_eps=5.0,
+            oldest_annual_eps=4.0,
         )
 
 
@@ -68,6 +78,8 @@ class MarketDataServiceTest(unittest.TestCase):
         self.assertEqual(snapshot["company_name"], "Example Inc.")
         self.assertAlmostEqual(snapshot["pe"], 20.2)
         self.assertEqual(snapshot["market_cap"], 1_010_000_000.0)
+        self.assertEqual(snapshot["positive_earnings_years"], 2)
+        self.assertEqual(len(snapshot["annual_history"]), 2)
 
     def test_stock_snapshot_uses_ttl_cache_until_expiry(self) -> None:
         clock = FakeClock()

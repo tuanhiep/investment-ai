@@ -64,6 +64,23 @@ class CompanyFundamentals:
     equity: float | None
     shares_outstanding: float | None
     fiscal_period: str | None
+    current_assets: float | None = None
+    current_liabilities: float | None = None
+    cash_and_equivalents: float | None = None
+    total_debt: float | None = None
+    operating_cash_flow: float | None = None
+    capital_expenditures: float | None = None
+    free_cash_flow: float | None = None
+    current_ratio: float | None = None
+    debt_to_equity: float | None = None
+    working_capital: float | None = None
+    annual_history: list[dict[str, Any]] | None = None
+    earnings_years: int | None = None
+    positive_earnings_years: int | None = None
+    latest_annual_revenue: float | None = None
+    oldest_annual_revenue: float | None = None
+    latest_annual_eps: float | None = None
+    oldest_annual_eps: float | None = None
     source: str = "SEC EDGAR"
 
 
@@ -168,6 +185,40 @@ class SecEdgarFundamentalProvider:
         net_income = self._latest_value(facts, ["NetIncomeLoss"], ["USD"])
         assets = self._latest_value(facts, ["Assets"], ["USD"])
         liabilities = self._latest_value(facts, ["Liabilities"], ["USD"])
+        current_assets = self._latest_value(facts, ["AssetsCurrent"], ["USD"])
+        current_liabilities = self._latest_value(facts, ["LiabilitiesCurrent"], ["USD"])
+        cash = self._latest_value(
+            facts,
+            [
+                "CashAndCashEquivalentsAtCarryingValue",
+                "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+            ],
+            ["USD"],
+        )
+        long_term_debt = self._latest_value(
+            facts,
+            [
+                "LongTermDebtAndFinanceLeaseObligationsCurrentAndNoncurrent",
+                "LongTermDebtAndCapitalLeaseObligations",
+                "LongTermDebt",
+            ],
+            ["USD"],
+        )
+        short_term_debt = self._latest_value(
+            facts,
+            ["ShortTermBorrowings", "ShortTermDebtCurrent", "LongTermDebtCurrent"],
+            ["USD"],
+        )
+        operating_cash_flow = self._latest_value(
+            facts,
+            ["NetCashProvidedByUsedInOperatingActivities"],
+            ["USD"],
+        )
+        capex = self._latest_value(
+            facts,
+            ["PaymentsToAcquirePropertyPlantAndEquipment"],
+            ["USD"],
+        )
         equity = self._latest_value(
             facts,
             ["StockholdersEquity", "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"],
@@ -181,6 +232,12 @@ class SecEdgarFundamentalProvider:
             forms=("10-K", "10-Q", "8-K"),
         )
         fiscal_period = self._latest_period(facts, ["NetIncomeLoss", "Assets", "StockholdersEquity"])
+        annual_history = self._annual_history(facts)
+        positive_earnings_years = sum(
+            1
+            for row in annual_history
+            if isinstance(row.get("net_income"), int | float) and row["net_income"] > 0
+        )
 
         return CompanyFundamentals(
             symbol=symbol,
@@ -195,6 +252,34 @@ class SecEdgarFundamentalProvider:
             equity=equity,
             shares_outstanding=shares,
             fiscal_period=fiscal_period,
+            current_assets=current_assets,
+            current_liabilities=current_liabilities,
+            cash_and_equivalents=cash,
+            total_debt=(long_term_debt or 0) + (short_term_debt or 0)
+            if long_term_debt is not None or short_term_debt is not None
+            else None,
+            operating_cash_flow=operating_cash_flow,
+            capital_expenditures=capex,
+            free_cash_flow=operating_cash_flow - abs(capex)
+            if operating_cash_flow is not None and capex is not None
+            else None,
+            current_ratio=_safe_divide(current_assets, current_liabilities),
+            debt_to_equity=_safe_divide(
+                (long_term_debt or 0) + (short_term_debt or 0)
+                if long_term_debt is not None or short_term_debt is not None
+                else None,
+                equity,
+            ),
+            working_capital=current_assets - current_liabilities
+            if current_assets is not None and current_liabilities is not None
+            else None,
+            annual_history=annual_history,
+            earnings_years=len([row for row in annual_history if row.get("net_income") is not None]),
+            positive_earnings_years=positive_earnings_years,
+            latest_annual_revenue=self._history_value(annual_history, "revenue", newest=True),
+            oldest_annual_revenue=self._history_value(annual_history, "revenue", newest=False),
+            latest_annual_eps=self._history_value(annual_history, "eps", newest=True),
+            oldest_annual_eps=self._history_value(annual_history, "eps", newest=False),
         )
 
     @lru_cache(maxsize=1)
@@ -213,6 +298,43 @@ class SecEdgarFundamentalProvider:
     ) -> float | None:
         fact = self._latest_fact(facts, concepts, units, forms)
         return _to_float(fact.get("val")) if fact else None
+
+    def _annual_history(self, facts: dict[str, Any], limit: int = 10) -> list[dict[str, Any]]:
+        history: dict[int, dict[str, Any]] = {}
+        for field, concepts, units in (
+            ("revenue", ["RevenueFromContractWithCustomerExcludingAssessedTax", "Revenues"], ["USD"]),
+            ("net_income", ["NetIncomeLoss"], ["USD"]),
+            ("eps", ["EarningsPerShareDiluted", "EarningsPerShareBasic"], ["USD/shares"]),
+            ("operating_cash_flow", ["NetCashProvidedByUsedInOperatingActivities"], ["USD"]),
+            ("capital_expenditures", ["PaymentsToAcquirePropertyPlantAndEquipment"], ["USD"]),
+        ):
+            for fact in self._annual_facts(facts, concepts, units):
+                year = _to_int(fact.get("fy"))
+                value = _to_float(fact.get("val"))
+                if year is None or value is None:
+                    continue
+                row = history.setdefault(year, {"year": year})
+                row.setdefault(field, value)
+
+        for row in history.values():
+            operating_cash_flow = row.get("operating_cash_flow")
+            capex = row.get("capital_expenditures")
+            row["free_cash_flow"] = (
+                operating_cash_flow - abs(capex)
+                if isinstance(operating_cash_flow, int | float) and isinstance(capex, int | float)
+                else None
+            )
+
+        return sorted(history.values(), key=lambda item: item["year"], reverse=True)[:limit]
+
+    @staticmethod
+    def _history_value(history: list[dict[str, Any]], field: str, newest: bool) -> float | None:
+        rows = history if newest else list(reversed(history))
+        for row in rows:
+            value = row.get(field)
+            if isinstance(value, int | float):
+                return value
+        return None
 
     def _latest_period(self, facts: dict[str, Any], concepts: list[str]) -> str | None:
         fact = self._latest_fact(facts, concepts, ["USD", "USD/shares", "shares"], ("10-K", "10-Q"))
@@ -243,6 +365,30 @@ class SecEdgarFundamentalProvider:
 
         candidates.sort(key=lambda item: (item.get("filed") or "", item.get("end") or ""), reverse=True)
         return candidates[0] if candidates else None
+
+    @staticmethod
+    def _annual_facts(
+        facts: dict[str, Any],
+        concepts: list[str],
+        units: list[str],
+    ) -> list[dict[str, Any]]:
+        candidates: list[dict[str, Any]] = []
+        for concept in concepts:
+            concept_units = facts.get(concept, {}).get("units", {})
+            for unit in units:
+                candidates.extend(
+                    item
+                    for item in concept_units.get(unit, [])
+                    if item.get("form") == "10-K" and item.get("fp") == "FY" and item.get("val") not in (None, "")
+                )
+
+        candidates.sort(key=lambda item: (item.get("fy") or 0, item.get("filed") or ""), reverse=True)
+        deduped: dict[int, dict[str, Any]] = {}
+        for item in candidates:
+            year = _to_int(item.get("fy"))
+            if year is not None and year not in deduped:
+                deduped[year] = item
+        return list(deduped.values())
 
 
 class MarketDataService:
@@ -290,6 +436,23 @@ class MarketDataService:
             "liabilities": None,
             "equity": None,
             "shares_outstanding": None,
+            "current_assets": None,
+            "current_liabilities": None,
+            "cash_and_equivalents": None,
+            "total_debt": None,
+            "operating_cash_flow": None,
+            "capital_expenditures": None,
+            "free_cash_flow": None,
+            "current_ratio": None,
+            "debt_to_equity": None,
+            "working_capital": None,
+            "annual_history": [],
+            "earnings_years": None,
+            "positive_earnings_years": None,
+            "latest_annual_revenue": None,
+            "oldest_annual_revenue": None,
+            "latest_annual_eps": None,
+            "oldest_annual_eps": None,
             "fiscal_period": None,
             "source": "Stooq + SEC EDGAR",
             "status": "unavailable",
@@ -313,7 +476,7 @@ class MarketDataService:
                     }
                 )
         except Exception:
-            warnings.append("Không lấy được dữ liệu giá từ Stooq.")
+            warnings.append("Could not retrieve price data from Stooq.")
 
         try:
             fundamentals = self.fundamental_provider.get_fundamentals(normalized)
@@ -329,11 +492,28 @@ class MarketDataService:
                         "liabilities": fundamentals.liabilities,
                         "equity": fundamentals.equity,
                         "shares_outstanding": fundamentals.shares_outstanding,
+                        "current_assets": fundamentals.current_assets,
+                        "current_liabilities": fundamentals.current_liabilities,
+                        "cash_and_equivalents": fundamentals.cash_and_equivalents,
+                        "total_debt": fundamentals.total_debt,
+                        "operating_cash_flow": fundamentals.operating_cash_flow,
+                        "capital_expenditures": fundamentals.capital_expenditures,
+                        "free_cash_flow": fundamentals.free_cash_flow,
+                        "current_ratio": fundamentals.current_ratio,
+                        "debt_to_equity": fundamentals.debt_to_equity,
+                        "working_capital": fundamentals.working_capital,
+                        "annual_history": fundamentals.annual_history or [],
+                        "earnings_years": fundamentals.earnings_years,
+                        "positive_earnings_years": fundamentals.positive_earnings_years,
+                        "latest_annual_revenue": fundamentals.latest_annual_revenue,
+                        "oldest_annual_revenue": fundamentals.oldest_annual_revenue,
+                        "latest_annual_eps": fundamentals.latest_annual_eps,
+                        "oldest_annual_eps": fundamentals.oldest_annual_eps,
                         "fiscal_period": fundamentals.fiscal_period,
                     }
                 )
         except Exception:
-            warnings.append("Không lấy được dữ liệu fundamentals từ SEC EDGAR.")
+            warnings.append("Could not retrieve fundamentals from SEC EDGAR.")
 
         snapshot["pe"] = _safe_divide(snapshot["price"], snapshot["eps"])
         snapshot["market_cap"] = (
@@ -352,7 +532,7 @@ class MarketDataService:
         if warnings:
             snapshot["warning"] = " ".join(warnings)
         elif snapshot["status"] == "partial":
-            snapshot["warning"] = "Dữ liệu đang một phần; một số chỉ số có thể là N/A."
+            snapshot["warning"] = "Data is partial; some measures may be N/A."
 
         self.cache.set(normalized, snapshot)
         return snapshot

@@ -1,16 +1,19 @@
 # InvestmentAI
 
-InvestmentAI is a full-stack investment research workspace inspired by Benjamin Graham. It combines a FastAPI backend, an AI/RAG advisory layer, Yahoo Finance snapshots, and a React/Vite frontend built for asking disciplined investment questions.
+InvestmentAI is a full-stack investment research workspace inspired by Benjamin Graham. It combines a FastAPI backend, a Graham-style AI/RAG advisory layer, Stooq + SEC EDGAR market evidence, and a React/Vite frontend built for asking disciplined investment questions.
 
 This project is not financial advice. It is a research assistant that helps separate facts, assumptions, risks, and next steps.
 
 ## What It Does
 
-- Answers investment questions with a Graham-style framework: margin of safety, intrinsic value, earnings stability, temperament, and evidence quality.
-- Retrieves local knowledge from `backend/db/data/graham_chunks.txt` before asking the LLM.
+- Answers investment questions with a stricter Graham-style framework: margin of safety, intrinsic value range, earnings stability, balance-sheet strength, investor temperament, and evidence quality.
+- Retrieves sourced local knowledge from `backend/db/data/graham_chunks.txt` with lightweight TF-IDF vector scoring before asking the LLM.
+- Detects ticker symbols in chat questions and injects current market evidence into the Benjamin Graham agent prompt.
+- Uses an internal Graham control layer inspired by Khí Học Tổ Thiên to keep every answer anchored in invariant, voice, boundary, pushback, and closure.
 - Works without an OpenAI key by returning a deterministic local fallback answer.
 - Uses OpenAI when `OPENAI_API_KEY` is configured.
 - Fetches free market snapshots by combining Stooq price data with SEC EDGAR company fundamentals.
+- Returns source citations and the market snapshot used by the chat answer.
 - Provides REST endpoints and a WebSocket chat endpoint.
 - Ships a responsive React investment workspace with chat, sources, decision principles, and market metrics.
 
@@ -75,7 +78,7 @@ Market data is intentionally built on free sources:
 - Stooq for latest available OHLCV price data.
 - SEC EDGAR Company Facts for U.S. company fundamentals such as EPS, revenue, net income, assets, liabilities, equity, and shares outstanding.
 
-Market snapshots use a small in-process TTL cache controlled by `MARKET_DATA_CACHE_TTL_SECONDS`. See `docs/data-pipeline.md`.
+Market snapshots use a small in-process TTL cache controlled by `MARKET_DATA_CACHE_TTL_SECONDS`. When a chat question includes a ticker such as `AAPL` or `cổ phiếu MSFT`, the advisor attempts to fetch that snapshot before answering. If current market evidence is unavailable, the Graham agent is instructed to say so instead of estimating from stale memory. See `docs/data-pipeline.md`.
 
 ## Frontend Setup
 

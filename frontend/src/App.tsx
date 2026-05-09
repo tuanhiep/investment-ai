@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import "./App.css";
 
 type SourceDocument = {
   title: string;
   summary: string;
   quote?: string | null;
+  source?: string | null;
+  source_type?: string | null;
   score: number;
 };
 
@@ -13,6 +15,7 @@ type ChatResponse = {
   answer: string;
   sources: SourceDocument[];
   mode: string;
+  market_snapshot?: StockSnapshot | null;
 };
 
 type StockSnapshot = {
@@ -35,6 +38,23 @@ type StockSnapshot = {
   liabilities?: number | null;
   equity?: number | null;
   shares_outstanding?: number | null;
+  current_assets?: number | null;
+  current_liabilities?: number | null;
+  cash_and_equivalents?: number | null;
+  total_debt?: number | null;
+  operating_cash_flow?: number | null;
+  capital_expenditures?: number | null;
+  free_cash_flow?: number | null;
+  current_ratio?: number | null;
+  debt_to_equity?: number | null;
+  working_capital?: number | null;
+  annual_history?: Array<Record<string, number | null>>;
+  earnings_years?: number | null;
+  positive_earnings_years?: number | null;
+  latest_annual_revenue?: number | null;
+  oldest_annual_revenue?: number | null;
+  latest_annual_eps?: number | null;
+  oldest_annual_eps?: number | null;
   fiscal_period?: string | null;
   source?: string;
   status?: "available" | "partial" | "unavailable";
@@ -46,19 +66,21 @@ type Message = {
   content: string;
   sources?: SourceDocument[];
   mode?: string;
+  marketSnapshot?: StockSnapshot | null;
 };
 
 const starterQuestions = [
-  "Tôi nên đánh giá một cổ phiếu tăng trưởng như thế nào theo Graham?",
-  "Biên an toàn có ý nghĩa gì khi thị trường đang hưng phấn?",
-  "Khi nào một nhà đầu tư phòng thủ nên bỏ qua một cơ hội?",
+  "Does AAPL offer a margin of safety at the current price?",
+  "Should MSFT be examined as a growth stock or a value investment?",
+  "What does margin of safety mean when the market is enthusiastic?",
+  "When should a defensive investor pass on an opportunity?",
 ];
 
 const principles = [
-  { label: "Margin of Safety", value: "Đòi hỏi khoảng cách giữa giá và giá trị." },
-  { label: "Intrinsic Value", value: "Ước tính bằng dữ kiện, không bằng kỳ vọng." },
-  { label: "Temperament", value: "Kỷ luật cảm xúc quan trọng như mô hình định giá." },
-  { label: "Evidence First", value: "Tách dữ kiện, giả định và kết luận." },
+  { label: "Margin of Safety", value: "Demand a gap between price and conservative value." },
+  { label: "Intrinsic Value", value: "Estimate with evidence, not enthusiasm." },
+  { label: "Temperament", value: "Emotional discipline is part of the investment method." },
+  { label: "Evidence First", value: "Separate facts, assumptions, and judgment." },
 ];
 
 function formatNumber(value?: number | null) {
@@ -74,13 +96,54 @@ function formatMarketCap(value?: number | null) {
   return formatNumber(value);
 }
 
+function renderInline(text: string): ReactNode[] {
+  return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={`${part}-${index}`}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return <code key={`${part}-${index}`}>{part.slice(1, -1)}</code>;
+    }
+    return part;
+  });
+}
+
+function renderMarkdown(content: string) {
+  return (
+    <div className="markdown-body">
+      {content.split(/\n{2,}/).map((block, blockIndex) => {
+        const lines = block.split("\n").filter(Boolean);
+        if (lines.length > 0 && lines.every((line) => line.trim().startsWith("- "))) {
+          return (
+            <ul key={`${block}-${blockIndex}`}>
+              {lines.map((line, lineIndex) => (
+                <li key={`${line}-${lineIndex}`}>{renderInline(line.replace(/^\s*-\s*/, ""))}</li>
+              ))}
+            </ul>
+          );
+        }
+        return (
+          <p key={`${block}-${blockIndex}`}>
+            {lines.map((line, lineIndex) => (
+              <span key={`${line}-${lineIndex}`}>
+                {renderInline(line)}
+                {lineIndex < lines.length - 1 ? <br /> : null}
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
       content:
-        "Tôi là InvestmentAI. Hãy đưa ticker, luận điểm đầu tư hoặc câu hỏi định giá; tôi sẽ phân tích theo kỷ luật Graham và chỉ rõ phần nào còn thiếu dữ kiện.",
+        "Give me a ticker, an investment thesis, or a valuation question. I will weigh the evidence, the price, the balance sheet, and the margin of safety.",
       mode: "system",
     },
   ]);
@@ -106,19 +169,25 @@ function App() {
         body: JSON.stringify({ message, session_id: sessionId }),
       });
 
-      if (!response.ok) throw new Error("Không thể kết nối backend");
+      if (!response.ok) throw new Error("Could not reach the research backend.");
       const data = (await response.json()) as ChatResponse;
       setSessionId(data.session_id);
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: data.answer, sources: data.sources, mode: data.mode },
+        {
+          role: "assistant",
+          content: data.answer,
+          sources: data.sources,
+          mode: data.mode,
+          marketSnapshot: data.market_snapshot,
+        },
       ]);
     } catch (error) {
       setMessages((current) => [
         ...current,
         {
           role: "assistant",
-          content: error instanceof Error ? error.message : "Có lỗi khi xử lý câu hỏi.",
+          content: error instanceof Error ? error.message : "The question could not be processed.",
           mode: "error",
         },
       ]);
@@ -135,11 +204,11 @@ function App() {
 
     try {
       const response = await fetch(`/api/stock/${encodeURIComponent(ticker)}`);
-      if (!response.ok) throw new Error("Yêu cầu dữ liệu thị trường không hợp lệ");
+      if (!response.ok) throw new Error("The market-data request is invalid.");
       setStock((await response.json()) as StockSnapshot);
     } catch (error) {
       setStock(null);
-      setStockError(error instanceof Error ? error.message : "Lỗi dữ liệu");
+      setStockError(error instanceof Error ? error.message : "Market-data error.");
     } finally {
       setLoadingStock(false);
     }
@@ -165,15 +234,25 @@ function App() {
               {messages.map((message, index) => (
                 <article className={`message ${message.role}`} key={`${message.role}-${index}`}>
                   <div className="message-meta">
-                    <span>{message.role === "user" ? "You" : "InvestmentAI"}</span>
+                    <span>{message.role === "user" ? "You" : "Graham"}</span>
                     {message.mode ? <small>{message.mode}</small> : null}
                   </div>
-                  <p>{message.content}</p>
+                  {renderMarkdown(message.content)}
+                  {message.marketSnapshot ? (
+                    <div className="market-evidence">
+                      <strong>{message.marketSnapshot.symbol} evidence used</strong>
+                      <span>
+                        {message.marketSnapshot.source || "Market data"} · {message.marketSnapshot.status || "unknown"}
+                        {message.marketSnapshot.as_of ? ` · ${message.marketSnapshot.as_of}` : ""}
+                      </span>
+                    </div>
+                  ) : null}
                   {message.sources && message.sources.length > 0 ? (
                     <div className="sources">
                       {message.sources.map((source) => (
                         <div className="source" key={source.title}>
                           <strong>{source.title}</strong>
+                          {source.source ? <em>{source.source}</em> : null}
                           <span>{source.summary}</span>
                         </div>
                       ))}
@@ -187,7 +266,7 @@ function App() {
                     <span>InvestmentAI</span>
                     <small>thinking</small>
                   </div>
-                  <p>Đang kiểm tra nguyên tắc, dữ kiện và biên an toàn...</p>
+                  <p>Weighing price, evidence, balance sheet strength, and margin of safety...</p>
                 </article>
               ) : null}
             </div>
@@ -210,7 +289,7 @@ function App() {
               <textarea
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="Nhập câu hỏi: ví dụ MSFT có đủ biên an toàn ở mức giá hiện tại không?"
+                placeholder="Ask a question, for example: Does MSFT offer a margin of safety at the current price?"
                 rows={3}
               />
               <button type="submit" disabled={isAsking || !input.trim()}>
@@ -291,6 +370,42 @@ function App() {
                 <div>
                   <dt>Equity</dt>
                   <dd>{formatMarketCap(stock?.equity)}</dd>
+                </div>
+                <div>
+                  <dt>Current Ratio</dt>
+                  <dd>{formatNumber(stock?.current_ratio)}</dd>
+                </div>
+                <div>
+                  <dt>Debt / Equity</dt>
+                  <dd>{formatNumber(stock?.debt_to_equity)}</dd>
+                </div>
+                <div>
+                  <dt>Working Capital</dt>
+                  <dd>{formatMarketCap(stock?.working_capital)}</dd>
+                </div>
+                <div>
+                  <dt>Free Cash Flow</dt>
+                  <dd>{formatMarketCap(stock?.free_cash_flow)}</dd>
+                </div>
+                <div>
+                  <dt>Cash</dt>
+                  <dd>{formatMarketCap(stock?.cash_and_equivalents)}</dd>
+                </div>
+                <div>
+                  <dt>Total Debt</dt>
+                  <dd>{formatMarketCap(stock?.total_debt)}</dd>
+                </div>
+                <div>
+                  <dt>Earnings Record</dt>
+                  <dd>
+                    {stock?.positive_earnings_years ?? "N/A"} / {stock?.earnings_years ?? "N/A"} yrs
+                  </dd>
+                </div>
+                <div>
+                  <dt>Annual EPS</dt>
+                  <dd>
+                    {formatNumber(stock?.oldest_annual_eps)} → {formatNumber(stock?.latest_annual_eps)}
+                  </dd>
                 </div>
               </dl>
             </section>
