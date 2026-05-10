@@ -9,8 +9,7 @@ Client request
   -> FastAPI /api/stock/{symbol}
   -> MarketDataService
   -> TTL cache lookup
-  -> Stooq price provider
-  -> SEC EDGAR fundamentals provider
+  -> Stooq + SEC EDGAR providers, or mock providers when INVESTMENTAI_USE_MOCK_DATA=true
   -> derived ratios
   -> typed API response
 ```
@@ -33,7 +32,9 @@ Client question
 
 - Stooq provides latest available OHLCV price snapshots.
 - SEC EDGAR Company Facts provides U.S. issuer fundamentals.
+- Mock providers provide deterministic public-demo data when `INVESTMENTAI_USE_MOCK_DATA=true`.
 - Local Graham notes under `backend/db/data/graham_chunks.txt` support the RAG advisory path. Each chunk includes a source and source type so responses can distinguish Graham primary texts, historical practice, SEC filings, and market data.
+- The public system prompt is loaded from `backend/config/prompts/graham_system_prompt.example.md` unless `INVESTMENTAI_SYSTEM_PROMPT_FILE` points to an ignored local or secret-mounted override.
 
 ## Cache Policy
 

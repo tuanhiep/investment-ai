@@ -391,6 +391,110 @@ class SecEdgarFundamentalProvider:
         return list(deduped.values())
 
 
+class MockPriceProvider:
+    def get_price(self, symbol: str) -> MarketPrice:
+        normalized = symbol.upper()
+        prices = {
+            "AAPL": 293.32,
+            "MSFT": 415.12,
+            "NVDA": 182.45,
+        }
+        price = prices.get(normalized, 100.0)
+        return MarketPrice(
+            symbol=normalized,
+            price=price,
+            open=price * 0.99,
+            high=price * 1.01,
+            low=price * 0.98,
+            volume=10_000_000,
+            as_of="mock latest close",
+            source="Mock",
+        )
+
+
+class MockFundamentalProvider:
+    def get_fundamentals(self, symbol: str) -> CompanyFundamentals:
+        normalized = symbol.upper()
+        if normalized == "MSFT":
+            return CompanyFundamentals(
+                symbol="MSFT",
+                cik="0000789019",
+                company_name="MICROSOFT CORPORATION",
+                eps=13.14,
+                roe=0.236,
+                revenue=241_832_000_000.0,
+                net_income=97_983_000_000.0,
+                assets=694_228_000_000.0,
+                liabilities=279_861_000_000.0,
+                equity=414_367_000_000.0,
+                shares_outstanding=7_428_434_704.0,
+                fiscal_period="mock FY",
+                current_assets=175_329_000_000.0,
+                current_liabilities=136_661_000_000.0,
+                cash_and_equivalents=32_105_000_000.0,
+                total_debt=49_101_000_000.0,
+                operating_cash_flow=127_494_000_000.0,
+                capital_expenditures=80_146_000_000.0,
+                free_cash_flow=47_348_000_000.0,
+                current_ratio=1.28,
+                debt_to_equity=0.12,
+                working_capital=38_668_000_000.0,
+                annual_history=[
+                    {"year": 2025, "revenue": 211_915_000_000.0, "net_income": 72_361_000_000.0, "eps": 9.68, "free_cash_flow": 59_475_000_000.0},
+                    {"year": 2024, "revenue": 198_270_000_000.0, "net_income": 72_738_000_000.0, "eps": 9.65, "free_cash_flow": 65_149_000_000.0},
+                    {"year": 2023, "revenue": 168_088_000_000.0, "net_income": 61_271_000_000.0, "eps": 8.05, "free_cash_flow": 56_118_000_000.0},
+                    {"year": 2022, "revenue": 143_015_000_000.0, "net_income": 44_281_000_000.0, "eps": 5.76, "free_cash_flow": 45_234_000_000.0},
+                    {"year": 2021, "revenue": 125_843_000_000.0, "net_income": 39_240_000_000.0, "eps": 5.06, "free_cash_flow": 38_260_000_000.0},
+                ],
+                earnings_years=5,
+                positive_earnings_years=5,
+                latest_annual_revenue=211_915_000_000.0,
+                oldest_annual_revenue=125_843_000_000.0,
+                latest_annual_eps=9.68,
+                oldest_annual_eps=5.06,
+                source="Mock SEC profile",
+            )
+
+        return CompanyFundamentals(
+            symbol=normalized,
+            cik="0000000000",
+            company_name=f"{normalized} MOCK COMPANY",
+            eps=5.0,
+            roe=0.18,
+            revenue=100_000_000_000.0,
+            net_income=15_000_000_000.0,
+            assets=180_000_000_000.0,
+            liabilities=70_000_000_000.0,
+            equity=110_000_000_000.0,
+            shares_outstanding=1_000_000_000.0,
+            fiscal_period="mock FY",
+            current_assets=80_000_000_000.0,
+            current_liabilities=40_000_000_000.0,
+            cash_and_equivalents=20_000_000_000.0,
+            total_debt=25_000_000_000.0,
+            operating_cash_flow=20_000_000_000.0,
+            capital_expenditures=5_000_000_000.0,
+            free_cash_flow=15_000_000_000.0,
+            current_ratio=2.0,
+            debt_to_equity=0.23,
+            working_capital=40_000_000_000.0,
+            annual_history=[
+                {"year": 2025, "revenue": 100_000_000_000.0, "net_income": 15_000_000_000.0, "eps": 5.0, "free_cash_flow": 15_000_000_000.0},
+                {"year": 2024, "revenue": 95_000_000_000.0, "net_income": 14_000_000_000.0, "eps": 4.6, "free_cash_flow": 14_000_000_000.0},
+                {"year": 2023, "revenue": 90_000_000_000.0, "net_income": 13_000_000_000.0, "eps": 4.2, "free_cash_flow": 13_000_000_000.0},
+                {"year": 2022, "revenue": 84_000_000_000.0, "net_income": 12_000_000_000.0, "eps": 3.8, "free_cash_flow": 12_000_000_000.0},
+                {"year": 2021, "revenue": 78_000_000_000.0, "net_income": 11_000_000_000.0, "eps": 3.4, "free_cash_flow": 11_000_000_000.0},
+            ],
+            earnings_years=5,
+            positive_earnings_years=5,
+            latest_annual_revenue=100_000_000_000.0,
+            oldest_annual_revenue=78_000_000_000.0,
+            latest_annual_eps=5.0,
+            oldest_annual_eps=3.4,
+            source="Mock SEC profile",
+        )
+
+
 class MarketDataService:
     def __init__(
         self,
@@ -399,11 +503,17 @@ class MarketDataService:
         cache: TtlCache | None = None,
     ) -> None:
         settings = get_settings()
-        self.price_provider = price_provider or StooqPriceProvider(settings.market_data_timeout_seconds)
-        self.fundamental_provider = fundamental_provider or SecEdgarFundamentalProvider(
-            timeout_seconds=settings.market_data_timeout_seconds,
-            user_agent=settings.sec_edgar_user_agent,
-        )
+        if settings.use_mock_market_data:
+            self.price_provider = price_provider or MockPriceProvider()
+            self.fundamental_provider = fundamental_provider or MockFundamentalProvider()
+            self.source_label = "Mock market data"
+        else:
+            self.price_provider = price_provider or StooqPriceProvider(settings.market_data_timeout_seconds)
+            self.fundamental_provider = fundamental_provider or SecEdgarFundamentalProvider(
+                timeout_seconds=settings.market_data_timeout_seconds,
+                user_agent=settings.sec_edgar_user_agent,
+            )
+            self.source_label = "Stooq + SEC EDGAR"
         self.cache = cache or TtlCache(settings.market_data_cache_ttl_seconds)
 
     def get_stock_snapshot(self, symbol: str) -> dict[str, Any]:
@@ -454,7 +564,7 @@ class MarketDataService:
             "latest_annual_eps": None,
             "oldest_annual_eps": None,
             "fiscal_period": None,
-            "source": "Stooq + SEC EDGAR",
+            "source": self.source_label,
             "status": "unavailable",
             "warning": None,
             "cache_status": "miss",

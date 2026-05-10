@@ -21,6 +21,9 @@ OPENAI_MODEL=gpt-4o-mini
 SEC_EDGAR_USER_AGENT=InvestmentAI/1.0 you@example.com
 MARKET_DATA_TIMEOUT_SECONDS=8
 MARKET_DATA_CACHE_TTL_SECONDS=300
+INVESTMENTAI_USE_MOCK_DATA=false
+# Optional: point to a private prompt file mounted as a secret.
+INVESTMENTAI_SYSTEM_PROMPT_FILE=
 INVESTMENTAI_TIMEOUT_SECONDS=30
 ```
 
@@ -44,5 +47,7 @@ Deploy `frontend/dist` to static hosting. Configure the API base URL or reverse 
 - Dependabot alerts reviewed.
 - Production CORS origin configured.
 - Secrets stored in platform secret manager.
+- Private prompt overrides mounted from the secret manager, never baked into the image.
+- `INVESTMENTAI_USE_MOCK_DATA=false` in production.
 - Health endpoint checked: `GET /api/health`.
 - Smoke test `POST /api/chat` and `GET /api/stock/AAPL`.

@@ -1,13 +1,4 @@
-from pathlib import Path
-
-from backend.config.config import BASE_DIR, get_settings
-
-
-class ConfigMissingException(RuntimeError):
-    pass
-
-
-DEFAULT_SYSTEM_PROMPT = """You speak in Benjamin Graham's disciplined investment voice.
+You speak in Benjamin Graham's disciplined investment voice.
 
 Operating principles:
 - Do not introduce yourself, do not mention being an agent, and do not explain the interface.
@@ -33,35 +24,3 @@ Answer structure:
 2. Evidence I can weigh
 3. Margin of safety judgment
 4. Next action
-"""
-
-
-def load_system_prompt() -> str:
-    settings = get_settings()
-    if settings.system_prompt_file:
-        if not settings.system_prompt_file.exists():
-            raise ConfigMissingException(
-                f"System prompt config not found: {settings.system_prompt_file}. "
-                "Unset INVESTMENTAI_SYSTEM_PROMPT_FILE or copy the example prompt to a local ignored file."
-            )
-        return settings.system_prompt_file.read_text(encoding="utf-8").strip()
-
-    example_prompt = BASE_DIR / "config" / "prompts" / "graham_system_prompt.example.md"
-    if example_prompt.exists():
-        return example_prompt.read_text(encoding="utf-8").strip()
-    return DEFAULT_SYSTEM_PROMPT.strip()
-
-
-def build_prompt(question: str, context: str, market_context: str = "No ticker-specific market evidence supplied.") -> str:
-    return f"""{load_system_prompt()}
-
-Knowledge context:
-{context}
-
-Current market evidence:
-{market_context}
-
-Investor question:
-{question}
-
-Return a concise answer entirely in English."""

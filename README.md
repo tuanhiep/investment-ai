@@ -13,6 +13,8 @@ This project is not financial advice. It is a research assistant that helps sepa
 - Works without an OpenAI key by returning a deterministic local fallback answer.
 - Uses OpenAI when `OPENAI_API_KEY` is configured.
 - Fetches free market snapshots by combining Stooq price data with SEC EDGAR company fundamentals.
+- Supports `INVESTMENTAI_USE_MOCK_DATA=true` so the public repo can run demos without live network dependencies.
+- Loads the public system prompt from `backend/config/prompts/graham_system_prompt.example.md`, while private prompt variants can be injected through `INVESTMENTAI_SYSTEM_PROMPT_FILE`.
 - Returns source citations and the market snapshot used by the chat answer.
 - Provides REST endpoints and a WebSocket chat endpoint.
 - Ships a responsive React investment workspace with chat, sources, decision principles, and market metrics.
@@ -25,7 +27,9 @@ InvestmentAI/
 │   ├── __init__.py               # Installable Python package
 │   ├── api/routes.py              # REST and WebSocket routes
 │   ├── agents/investment_advisor_prompt.py
-│   ├── config/config.py           # Environment-driven settings
+│   ├── config/
+│   │   ├── config.py              # Environment-driven settings
+│   │   └── prompts/               # Public prompt template + ignored local overrides
 │   ├── db/data/graham_chunks.txt  # Local investment knowledge base
 │   ├── services/                  # Advisor, retrieval, Stooq + SEC market data
 │   ├── schemas.py                 # API models
@@ -58,6 +62,24 @@ pip install -e ".[dev]"
 ```
 
 Set `OPENAI_API_KEY` in `backend/.env` or your shell if you want LLM answers. Without it, the backend still runs in local fallback mode.
+
+For a public-demo clone, the default `.env.example` uses mock market data:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Set `INVESTMENTAI_USE_MOCK_DATA=false` to call Stooq and SEC EDGAR live.
+
+Private prompt customization is optional and does not break the public build:
+
+```bash
+cp backend/config/prompts/graham_system_prompt.example.md backend/config/prompts/graham_system_prompt.local.md
+# edit the local file, then set:
+INVESTMENTAI_SYSTEM_PROMPT_FILE=backend/config/prompts/graham_system_prompt.local.md
+```
+
+`*.local.md` prompt files are ignored by git. The app still runs with the public example prompt when no private prompt is configured.
 
 ```bash
 cd ..
@@ -107,4 +129,16 @@ python -m pytest
 
 Never commit API keys. Use environment variables or `backend/.env`, which is ignored by git.
 
+This repository is structured to be public-safe: keys, local prompt overrides, virtual environments, and generated artifacts are excluded. The public prompt is a runnable baseline, while any proprietary prompt or operating contract should live in an ignored local file or deployment secret.
+
 See `docs/threat-model.md` and `docs/deployment.md` for the current production-hardening assumptions and release checklist.
+
+## Public Showcase Positioning
+
+This repo is strongest as an engineering artifact, not as a polished consumer investing product. If made public, position it around architecture lessons:
+
+- Evidence-grounded financial RAG rather than a generic LLM wrapper.
+- Runtime market data boundaries: live data, mock mode, cache, and explicit uncertainty.
+- Prompt/config separation so public code runs while private strategy remains injectable.
+- Graham control layer for invariant, voice, boundary, pushback, and closure.
+- Future scale paths: shared cache, background ingestion, filing normalization, queue-backed refresh, and observability.
