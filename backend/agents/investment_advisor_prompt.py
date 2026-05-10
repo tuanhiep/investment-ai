@@ -52,7 +52,12 @@ def load_system_prompt() -> str:
     return DEFAULT_SYSTEM_PROMPT.strip()
 
 
-def build_prompt(question: str, context: str, market_context: str = "No ticker-specific market evidence supplied.") -> str:
+def build_prompt(
+    question: str,
+    context: str,
+    market_context: str = "No ticker-specific market evidence supplied.",
+    decision_context: str = "No deterministic Graham decision context supplied.",
+) -> str:
     return f"""{load_system_prompt()}
 
 Knowledge context:
@@ -60,6 +65,9 @@ Knowledge context:
 
 Current market evidence:
 {market_context}
+
+Deterministic Graham decision context:
+{decision_context}
 
 Investor question:
 {question}

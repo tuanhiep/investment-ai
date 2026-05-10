@@ -197,6 +197,30 @@
   padding: 10px 12px;
 }
 
+.decision-strip {
+  align-items: center;
+  background: #f7efd9;
+  border: 1px solid #dfcfab;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 9px 12px;
+}
+
+.decision-strip span {
+  color: #173d32;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.decision-strip strong {
+  color: #7a4d21;
+  font-size: 0.82rem;
+}
+
 .market-evidence strong {
   color: #173d32;
   font-size: 0.86rem;

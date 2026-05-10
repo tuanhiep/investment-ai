@@ -49,6 +49,8 @@ class InvestmentAdvisorServiceTest(unittest.TestCase):
         self.assertEqual(response.market_snapshot["symbol"], "AAPL")
         self.assertIn("Evidence I can weigh", response.answer)
         self.assertIn("Margin of safety judgment", response.answer)
+        self.assertIsNotNone(response.decision_state)
+        self.assertIsNotNone(response.evidence_score)
         self.assertTrue(response.sources)
 
     def test_ticker_extraction_ignores_financial_acronyms(self) -> None:

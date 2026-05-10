@@ -53,6 +53,8 @@ class GrahamQiControlTest(unittest.TestCase):
         self.assertIn("the business quality is more evident than the bargain", assessment.direct_view)
         self.assertIn("A good business is not automatically a good purchase", rendered)
         self.assertIn("watchlist candidate", rendered)
+        self.assertEqual(assessment.decision_state, "QUALITY_BUT_EXPENSIVE")
+        self.assertGreaterEqual(assessment.evidence_score, 90)
 
     def test_unavailable_market_data_refuses_memory_substitution(self) -> None:
         control = GrahamQiControl()
@@ -65,6 +67,7 @@ class GrahamQiControlTest(unittest.TestCase):
 
         self.assertIn("could not be retrieved", assessment.direct_view)
         self.assertIn("will not replace current evidence with memory", assessment.direct_view)
+        self.assertEqual(assessment.decision_state, "DATA_UNAVAILABLE")
 
 
 if __name__ == "__main__":

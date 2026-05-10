@@ -16,6 +16,8 @@ type ChatResponse = {
   sources: SourceDocument[];
   mode: string;
   market_snapshot?: StockSnapshot | null;
+  decision_state?: string | null;
+  evidence_score?: number | null;
 };
 
 type StockSnapshot = {
@@ -67,6 +69,8 @@ type Message = {
   sources?: SourceDocument[];
   mode?: string;
   marketSnapshot?: StockSnapshot | null;
+  decisionState?: string | null;
+  evidenceScore?: number | null;
 };
 
 const starterQuestions = [
@@ -180,6 +184,8 @@ function App() {
           sources: data.sources,
           mode: data.mode,
           marketSnapshot: data.market_snapshot,
+          decisionState: data.decision_state,
+          evidenceScore: data.evidence_score,
         },
       ]);
     } catch (error) {
@@ -238,6 +244,14 @@ function App() {
                     {message.mode ? <small>{message.mode}</small> : null}
                   </div>
                   {renderMarkdown(message.content)}
+                  {message.decisionState ? (
+                    <div className="decision-strip">
+                      <span>{message.decisionState.replace(/_/g, " ")}</span>
+                      {message.evidenceScore !== null && message.evidenceScore !== undefined ? (
+                        <strong>{message.evidenceScore}/100 evidence</strong>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {message.marketSnapshot ? (
                     <div className="market-evidence">
                       <strong>{message.marketSnapshot.symbol} evidence used</strong>

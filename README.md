@@ -10,6 +10,7 @@ This project is not financial advice. It is a research assistant that helps sepa
 - Retrieves sourced local knowledge from `backend/db/data/graham_chunks.txt` with lightweight TF-IDF vector scoring before asking the LLM.
 - Detects ticker symbols in chat questions and injects current market evidence into the Benjamin Graham agent prompt.
 - Uses an internal Graham control layer inspired by Khí Học Tổ Thiên to keep every answer anchored in invariant, voice, boundary, pushback, and closure.
+- Computes a Graham Decision Kernel output with decision state, evidence score, first-pass valuation arithmetic, and margin-of-safety notes.
 - Works without an OpenAI key by returning a deterministic local fallback answer.
 - Uses OpenAI when `OPENAI_API_KEY` is configured.
 - Fetches free market snapshots by combining Stooq price data with SEC EDGAR company fundamentals.
@@ -141,4 +142,5 @@ This repo is strongest as an engineering artifact, not as a polished consumer in
 - Runtime market data boundaries: live data, mock mode, cache, and explicit uncertainty.
 - Prompt/config separation so public code runs while private strategy remains injectable.
 - Graham control layer for invariant, voice, boundary, pushback, and closure.
+- Decision-state taxonomy (`BARGAIN`, `WATCHLIST`, `QUALITY_BUT_EXPENSIVE`, `INSUFFICIENT_EVIDENCE`, `AVOID`, `DATA_UNAVAILABLE`) backed by tests.
 - Future scale paths: shared cache, background ingestion, filing normalization, queue-backed refresh, and observability.

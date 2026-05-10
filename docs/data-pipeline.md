@@ -24,6 +24,7 @@ Client question
   -> ticker detection
   -> MarketDataService when a ticker is present
   -> GrahamQiControl judgment layer
+  -> Valuation arithmetic + GrahamPolicyEngine decision state
   -> prompt with knowledge context + current market evidence
   -> answer with sources + market_snapshot
 ```
@@ -53,3 +54,5 @@ The cache is intentionally in-memory because the current app is a single-process
 - Chat answers must not substitute memory for current market evidence. If ticker-specific data cannot be retrieved, the answer should state the retrieval failure and continue only with principles and a research checklist.
 - Retrieval uses local TF-IDF vector scoring plus keyword/title boosts. This keeps the MVP dependency-light while improving over plain token overlap.
 - The Graham judgment layer uses Khí Học Tổ Thiên as an internal control plane: `Tru` for invariants, `Tanh` for voice, `Gioi` for boundaries, `Phan` for pushback, and `Hoi` for closure. It does not replace financial evidence; it keeps the Graham answer disciplined, human, and decisive.
+- The decision kernel emits machine-readable `decision_state` and `evidence_score` fields in addition to markdown. The public UI renders these as a compact decision strip.
+- First-pass valuation arithmetic includes normalized EPS, conservative 15x EPS value, normalized FCF, FCF yield, earnings yield, NCAV/share, and first-pass margin-of-safety percentage.

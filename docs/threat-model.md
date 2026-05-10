@@ -37,6 +37,7 @@ InvestmentAI is a research assistant, not a trading or financial-advice system.
 - Chat requests have Pydantic length validation.
 - Market data has timeout controls and TTL caching.
 - Partial data is surfaced with warning fields.
+- Decision-state and evidence-score outputs make uncertainty explicit instead of hiding it in prose.
 - The assistant copy explicitly says it is not financial advice.
 - CI builds frontend and validates backend import/test paths.
 

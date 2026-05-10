@@ -23,6 +23,8 @@ class ChatResponse(BaseModel):
     sources: list[SourceDocument] = Field(default_factory=list)
     mode: str
     market_snapshot: dict[str, Any] | None = None
+    decision_state: str | None = None
+    evidence_score: int | None = None
 
 
 class StockSnapshot(BaseModel):

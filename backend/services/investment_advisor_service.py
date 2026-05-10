@@ -10,7 +10,7 @@ except ImportError:  # pragma: no cover - exercised when optional LLM dependency
     AsyncOpenAI = None  # type: ignore[assignment]
 
 from backend.agents.investment_advisor_prompt import build_prompt
-from backend.agents.graham_control import graham_qi_control
+from backend.agents.graham_control import GrahamAssessment, graham_qi_control
 from backend.config.config import get_settings
 from backend.schemas import ChatResponse, SourceDocument
 from backend.services.knowledge_repository import KnowledgeChunk, load_knowledge, retrieve
@@ -161,23 +161,35 @@ class InvestmentAdvisor:
         market_snapshot: dict[str, Any] | None = None,
         requested_symbol: str | None = None,
     ) -> str:
+        return self._assess(question, matches, market_snapshot, requested_symbol).to_markdown()
+
+    def _assess(
+        self,
+        question: str,
+        matches: list[tuple[KnowledgeChunk, float]],
+        market_snapshot: dict[str, Any] | None,
+        requested_symbol: str | None,
+    ) -> GrahamAssessment:
         source = matches[0][0] if matches else None
         principle = source.title if source else "Margin of Safety"
-        return graham_qi_control.assess(question, principle, market_snapshot, requested_symbol).to_markdown()
+        return graham_qi_control.assess(question, principle, market_snapshot, requested_symbol)
 
     async def ask(self, message: str, session_id: str | None = None) -> ChatResponse:
         matches = retrieve(message, self.knowledge)
         sources = self._sources(matches)
         session = session_id or str(uuid4())
         requested_symbol, market_snapshot = self._load_market_snapshot(message)
+        assessment = self._assess(message, matches, market_snapshot, requested_symbol)
 
         if not self.client:
             return ChatResponse(
                 session_id=session,
-                answer=self._fallback_answer(message, matches, market_snapshot, requested_symbol),
+                answer=assessment.to_markdown(),
                 sources=sources,
                 mode="local-fallback",
                 market_snapshot=market_snapshot,
+                decision_state=assessment.decision_state,
+                evidence_score=assessment.evidence_score,
             )
 
         completion = await self.client.chat.completions.create(
@@ -190,6 +202,7 @@ class InvestmentAdvisor:
                         message,
                         self._context(matches),
                         self._market_context(market_snapshot, requested_symbol),
+                        assessment.to_markdown(),
                     ),
                 },
             ],
@@ -202,6 +215,8 @@ class InvestmentAdvisor:
             sources=sources,
             mode="openai",
             market_snapshot=market_snapshot,
+            decision_state=assessment.decision_state,
+            evidence_score=assessment.evidence_score,
         )
 
     async def stream(self, message: str) -> AsyncIterator[str]:
@@ -224,6 +239,7 @@ class InvestmentAdvisor:
                         message,
                         self._context(matches),
                         self._market_context(market_snapshot, requested_symbol),
+                        self._assess(message, matches, market_snapshot, requested_symbol).to_markdown(),
                     ),
                 },
             ],
